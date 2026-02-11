@@ -17,16 +17,18 @@ import { VALIDATION } from "./copy";
 
 const BANNED_PATTERNS: RegExp[] = [
   // Direct threats or violent language
-  /\b(kill|murder|hurt|harm|attack|stalk)\s*(you|them|her|him)\b/i,
+  /\b(kill|murder|hurt|harm|attack|stalk)\s*(you|them|her|him|yourself)\b/i,
+  /\b(want|going)\s*to\s*(kill|hurt|harm)\s*(you|them|her|him)\b/i,
+  /\bkill\s*yourself\b/i,
   /\bdie\b/i,
   /\bkys\b/i,
 
   // Slurs and hate speech (abbreviated to avoid offense)
   /\b(b[i!1]tch|wh[o0]re|sl[u\*]t|c[u\*]nt)\b/i,
 
-  // Harassment encouragement
-  /\bsend\s*(this\s*)?(to|2)\s*(your|ur|my)?\s*ex\b/i,
-  /\bforward\s*(this\s*)?(to|2)\s*(them|her|him)\b/i,
+  // Harassment encouragement - send/forward patterns
+  /\bsend\s*(this\s*)?(to|2)\s*(your|ur|my)?\s*(ex|them|her|him)\b/i,
+  /\bforward\s*(this\s*)?(to|2)\s*(your|ur|my)?\s*(ex|them|her|him)\b/i,
 
   // Personal info requests
   /\b(address|phone\s*number|where\s*(do\s*)?(you|they)\s*live)\b/i,

@@ -24,13 +24,62 @@ import { NextRequest } from "next/server";
 
 const mockGetReceipt = getReceipt as jest.MockedFunction<typeof getReceipt>;
 
+// Mock Next.js server components for testing
+jest.mock("next/server", () => {
+  const NextResponse = jest.fn((body: any, init?: any) => {
+    const headersObj = init?.headers || {};
+    return {
+      json: () => Promise.resolve(JSON.parse(body)),
+      text: () => Promise.resolve(body),
+      status: init?.status || 200,
+      headers: {
+        get: (name: string) => {
+          // Handle case-insensitive header lookup
+          const lowerName = name.toLowerCase();
+          for (const [key, value] of Object.entries(headersObj)) {
+            if (key.toLowerCase() === lowerName) {
+              return value;
+            }
+          }
+          return undefined;
+        },
+      },
+    };
+  });
+  
+  NextResponse.json = (body: any, init?: any) => {
+    return {
+      json: () => Promise.resolve(body),
+      status: init?.status || 200,
+      headers: {
+        get: (name: string) => name.toLowerCase() === "content-type" ? "application/json" : undefined,
+      },
+    };
+  };
+
+  return {
+    ...jest.requireActual("next/server"),
+    NextRequest: jest.fn((url: string | Request) => {
+      const urlObj = typeof url === "string" ? new URL(url) : new URL((url as any).url);
+      return {
+        url: urlObj.toString(),
+        nextUrl: urlObj,
+        headers: new Map(),
+        method: "GET",
+        json: jest.fn().mockResolvedValue({}),
+      };
+    }),
+    NextResponse,
+  };
+});
+
 describe("/api/og endpoint", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it("returns 400 when slug is missing", async () => {
-    const request = new NextRequest("http://localhost:3000/api/og");
+    const request = new (NextRequest as any)("http://localhost:3000/api/og");
     const response = await GET(request);
 
     expect(response.status).toBe(400);
@@ -54,7 +103,7 @@ describe("/api/og endpoint", () => {
       moodPreset: "spicy",
     });
 
-    const request = new NextRequest("http://localhost:3000/api/og?slug=abc12345");
+    const request = new (NextRequest as any)("http://localhost:3000/api/og?slug=abc12345");
     const response = await GET(request);
 
     expect(response.status).toBe(200);
@@ -70,7 +119,7 @@ describe("/api/og endpoint", () => {
   it("returns placeholder SVG for non-existent receipt", async () => {
     mockGetReceipt.mockResolvedValue(null);
 
-    const request = new NextRequest("http://localhost:3000/api/og?slug=notfound");
+    const request = new (NextRequest as any)("http://localhost:3000/api/og?slug=notfound");
     const response = await GET(request);
 
     expect(response.status).toBe(200);
@@ -97,7 +146,7 @@ describe("/api/og endpoint", () => {
       moodPreset: "reflective",
     });
 
-    const request = new NextRequest("http://localhost:3000/api/og?slug=test1234");
+    const request = new (NextRequest as any)("http://localhost:3000/api/og?slug=test1234");
     const response = await GET(request);
     const svg = await response.text();
 
