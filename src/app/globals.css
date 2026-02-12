@@ -1,12 +1,13 @@
 @import "tailwindcss";
 
 /* ╔════════════════════════════════════════════════════════╗
-   ║  Custom Font Loading for PDF Export                     ║
+   ║  Custom Font Loading for PDF Export                    ║
    ╚════════════════════════════════════════════════════════╝ */
 
 @font-face {
   font-family: 'PoppinsExtraBold';
-  src: url('/fonts/Poppins-ExtraBold.woff2') format('woff2');
+  src: url('/fonts/Poppins-ExtraBold.woff2') format('woff2'),
+       url('/fonts/Poppins-ExtraBold.ttf') format('truetype');
   font-weight: 800;
   font-style: normal;
   font-display: swap;
@@ -39,13 +40,6 @@
 [data-mood="reflective"] { --accent: #f59e0b; --accent-light: #fef3c7; }
 [data-mood="spicy"]      { --accent: #a78bfa; --accent-light: #ede9fe; }
 [data-mood="nuclear"]    { --accent: #ef4444; --accent-light: #fef2f2; }
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #1c1917;
-    --foreground: #f5f5f4;
-  }
-}
 
 * { box-sizing: border-box; }
 
@@ -94,10 +88,37 @@ body {
 }
 .animate-micro-bounce { animation: mascot-bounce 2s ease-in-out infinite; }
 
+/* ── Valentine floating hearts animation ── */
+@keyframes float-up {
+  0% {
+    transform: translateY(100vh) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.2;
+  }
+  90% {
+    opacity: 0.2;
+  }
+  100% {
+    transform: translateY(-100px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.valentine-heart {
+  animation: float-up 20s linear infinite;
+}
+
+.valentine-bg {
+  z-index: 0;
+}
+
 /* ── Reduced motion support ── */
 @media (prefers-reduced-motion: reduce) {
   .animate-float,
-  .animate-micro-bounce {
+  .animate-micro-bounce,
+  .valentine-heart {
     animation: none;
   }
   

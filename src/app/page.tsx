@@ -22,12 +22,11 @@ import { trackPageView, track } from "@/lib/analytics";
  */
 export default function HomePage() {
   const [hovering, setHovering] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const mounted = true; // Always mounted after initial render
   const prefersReducedMotion = useReducedMotion();
 
   // Track page view on mount
   useEffect(() => {
-    setMounted(true);
     if (FEATURE_FLAGS.ANALYTICS) {
       trackPageView("home");
     }

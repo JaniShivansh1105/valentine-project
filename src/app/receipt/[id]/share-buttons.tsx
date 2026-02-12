@@ -14,7 +14,7 @@ interface Props {
 }
 
 /**
- * Social share buttons — WhatsApp, Twitter/X, LinkedIn, Facebook, Reddit.
+ * Social share buttons — WhatsApp, X, Instagram, LinkedIn, Facebook, Reddit.
  * Each link appends UTM params for tracking.
  * Uses the single approved share caption by default.
  */
@@ -38,10 +38,16 @@ export function ShareButtons({ url, text, slug }: Props) {
       channel: "whatsapp",
     },
     {
-      label: "Twitter",
+      label: "X",
       href: `https://twitter.com/intent/tweet?text=${encodedText}&url=${encoded("twitter")}`,
-      colour: "hover:bg-sky-50 hover:text-sky-700",
-      channel: "twitter",
+      colour: "hover:bg-neutral-100 hover:text-neutral-900",
+      channel: "x",
+    },
+    {
+      label: "Instagram",
+      href: `https://www.instagram.com/?url=${encoded("instagram")}`,
+      colour: "hover:bg-pink-50 hover:text-pink-600",
+      channel: "instagram",
     },
     {
       label: "LinkedIn",

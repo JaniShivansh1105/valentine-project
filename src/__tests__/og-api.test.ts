@@ -26,7 +26,7 @@ const mockGetReceipt = getReceipt as jest.MockedFunction<typeof getReceipt>;
 
 // Mock Next.js server components for testing
 jest.mock("next/server", () => {
-  const NextResponse = jest.fn((body: any, init?: any) => {
+  const NextResponse = jest.fn((body: string, init?: { status?: number; headers?: Record<string, string> }) => {
     const headersObj = init?.headers || {};
     return {
       json: () => Promise.resolve(JSON.parse(body)),
@@ -45,9 +45,9 @@ jest.mock("next/server", () => {
         },
       },
     };
-  });
+  }) as jest.Mock & { json: (body: unknown, init?: { status?: number }) => unknown };
   
-  NextResponse.json = (body: any, init?: any) => {
+  NextResponse.json = (body: unknown, init?: { status?: number }) => {
     return {
       json: () => Promise.resolve(body),
       status: init?.status || 200,
@@ -60,7 +60,7 @@ jest.mock("next/server", () => {
   return {
     ...jest.requireActual("next/server"),
     NextRequest: jest.fn((url: string | Request) => {
-      const urlObj = typeof url === "string" ? new URL(url) : new URL((url as any).url);
+      const urlObj = typeof url === "string" ? new URL(url) : new URL((url as Request).url);
       return {
         url: urlObj.toString(),
         nextUrl: urlObj,
@@ -79,6 +79,7 @@ describe("/api/og endpoint", () => {
   });
 
   it("returns 400 when slug is missing", async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const request = new (NextRequest as any)("http://localhost:3000/api/og");
     const response = await GET(request);
 
@@ -103,6 +104,7 @@ describe("/api/og endpoint", () => {
       moodPreset: "spicy",
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const request = new (NextRequest as any)("http://localhost:3000/api/og?slug=abc12345");
     const response = await GET(request);
 
@@ -119,6 +121,7 @@ describe("/api/og endpoint", () => {
   it("returns placeholder SVG for non-existent receipt", async () => {
     mockGetReceipt.mockResolvedValue(null);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const request = new (NextRequest as any)("http://localhost:3000/api/og?slug=notfound");
     const response = await GET(request);
 
@@ -146,6 +149,7 @@ describe("/api/og endpoint", () => {
       moodPreset: "reflective",
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const request = new (NextRequest as any)("http://localhost:3000/api/og?slug=test1234");
     const response = await GET(request);
     const svg = await response.text();

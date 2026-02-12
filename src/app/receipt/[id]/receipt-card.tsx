@@ -13,12 +13,12 @@ import confetti from "canvas-confetti";
 import { motion } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { MascotSVG } from "@/components/mascot";
 import type { ReceiptRecord } from "@/lib/types";
 import { getMoodTheme, buildSubtitle, deriveLessons, closurePlaylist, toneLine } from "@/lib/mood";
 import { receiptUrl, withUtm } from "@/lib/utils";
-import { RECEIPT_VERDICT, RECEIPT_TITLE, PDF_FOOTER, SHARE_CAPTION } from "@/lib/copy";
+import { RECEIPT_VERDICT, RECEIPT_TITLE } from "@/lib/copy";
 import { track, trackPageView } from "@/lib/analytics";
 import { FEATURE_FLAGS } from "@/lib/feature-flags";
 import { withPdfFonts } from "@/lib/pdf-fonts";
@@ -243,10 +243,6 @@ export function ReceiptCard({ receipt }: Props) {
             Playlist: {playlist.label}
           </a>
         </CardContent>
-
-        <CardFooter className="flex-col gap-1 text-center text-[11px] text-neutral-300">
-          {PDF_FOOTER}
-        </CardFooter>
       </Card>
 
       {/* Action buttons */}

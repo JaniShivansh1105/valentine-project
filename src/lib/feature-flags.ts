@@ -52,8 +52,10 @@ export const FEATURE_FLAGS = {
   /**
    * Enable the /api/og dynamic OG image endpoint.
    * Set FEATURE_OG_API=true in .env.local to enable.
+   * Defaults to true in production when env var is not set.
    */
-  OG_API: process.env.NEXT_PUBLIC_FEATURE_OG_API === "true",
+  OG_API: process.env.NEXT_PUBLIC_FEATURE_OG_API === "true" || 
+          (process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_FEATURE_OG_API === undefined),
 
   /**
    * Enable PDF font embedding fixes.

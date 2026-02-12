@@ -33,6 +33,7 @@ const emotionalLabels: Record<MoodPreset, string> = {
 export function GenerateForm() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [showOverlay, setShowOverlay] = useState(false);
 
   // Form state
   const [yourName, setYourName] = useState("");
@@ -61,6 +62,8 @@ export function GenerateForm() {
         return;
       }
 
+      setShowOverlay(true);
+      await new Promise((r) => setTimeout(r, 1500));
       setLoading(true);
       try {
         const res = await fetch("/api/create", {
@@ -91,6 +94,7 @@ export function GenerateForm() {
         toast.error(err instanceof Error ? err.message : "Failed to create receipt.");
       } finally {
         setLoading(false);
+        setShowOverlay(false);
       }
     },
     [yourName, partnerName, timeInvested, moneySpent, emotionalDamage, betrayalLevel, note, anonymous, tone, router]
@@ -106,6 +110,58 @@ export function GenerateForm() {
           : "Absolute";
 
   return (
+    <>
+    {/* Fullscreen loading overlay */}
+    <AnimatePresence>
+      {showOverlay && (
+        <motion.div
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          {/* Spinning ring */}
+          <div className="relative h-20 w-20">
+            <svg className="h-20 w-20 animate-spin" viewBox="0 0 80 80">
+              <circle
+                cx="40" cy="40" r="34"
+                fill="none"
+                stroke="#e5e5e5"
+                strokeWidth="5"
+              />
+              <circle
+                cx="40" cy="40" r="34"
+                fill="none"
+                stroke={theme.accent}
+                strokeWidth="5"
+                strokeLinecap="round"
+                strokeDasharray="160"
+                strokeDashoffset="80"
+              />
+            </svg>
+            <MascotSVG mood={mood} className="absolute inset-0 m-auto h-10 w-10" />
+          </div>
+          <motion.p
+            className="mt-4 text-sm font-medium text-neutral-600"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            Preparing your closure…
+          </motion.p>
+          <motion.p
+            className="mt-1 text-xs text-neutral-400"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+          >
+            No refunds after this point.
+          </motion.p>
+        </motion.div>
+      )}
+    </AnimatePresence>
+
     <Card className="w-full max-w-xl">
       <CardContent className="p-8">
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
@@ -311,5 +367,6 @@ export function GenerateForm() {
         </form>
       </CardContent>
     </Card>
+    </>
   );
 }
