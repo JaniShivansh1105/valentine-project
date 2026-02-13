@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ReceiptPage({ params }: Props) {
   const { id } = params;
-  const receipt = await getReceipt(id);
+  const receipt = (await getReceipt(id)) as any;
 
   if (!receipt) notFound();
 
