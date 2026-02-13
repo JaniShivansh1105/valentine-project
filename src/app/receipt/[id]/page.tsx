@@ -1,3 +1,14 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import { getReceipt } from "@/lib/store";
+import { getMoodTheme, buildSubtitle } from "@/lib/mood";
+import { receiptUrl } from "@/lib/utils";
+import { META, SHARE_CAPTION, RECEIPT_VERDICT } from "@/lib/copy";
+import { FEATURE_FLAGS } from "@/lib/feature-flags";
+import { ReceiptCard } from "./receipt-card";
+
 interface Props {
   params: { id: string };
 }

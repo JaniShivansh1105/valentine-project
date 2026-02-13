@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import clientPromise from "@/lib/mongodb";
-import type { ReceiptFormData } from "./types";
+import { moodFromDamage } from "./mood";
+import type { ReceiptFormData, ReceiptRecord } from "./types";
 
 export async function saveReceipt(data: ReceiptFormData): Promise<string> {
   const client = await clientPromise;
@@ -14,7 +15,7 @@ export async function saveReceipt(data: ReceiptFormData): Promise<string> {
   return result.insertedId.toString();
 }
 
-export async function getReceipt(id: string) {
+export async function getReceipt(id: string): Promise<ReceiptRecord | null> {
   try {
     const client = await clientPromise;
     const db = client.db("closureDB");
@@ -25,10 +26,15 @@ export async function getReceipt(id: string) {
 
     if (!receipt) return null;
 
+    const emotionalDamage = typeof receipt.emotionalDamage === "number" ? receipt.emotionalDamage : 0;
+
     return {
       ...receipt,
       _id: receipt._id.toString(),
-    };
+      slug: receipt._id.toString(),
+      createdAt: receipt.createdAt instanceof Date ? receipt.createdAt.toISOString() : String(receipt.createdAt),
+      moodPreset: moodFromDamage(emotionalDamage),
+    } as unknown as ReceiptRecord;
   } catch {
     return null;
   }
