@@ -12,11 +12,11 @@ import { FEATURE_FLAGS } from "@/lib/feature-flags";
 import { ReceiptCard } from "./receipt-card";
 
 interface Props {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = params;
+  const { id } = await params;
   const receipt = await getReceipt(id);
   if (!receipt) return { title: "Not Found" };
 
@@ -57,8 +57,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ReceiptPage({ params }: Props) {
-  const { id } = params;
-  const receipt = (await getReceipt(id)) as any;
+  const { id } = await params;
+  const receipt = await getReceipt(id);
 
   if (!receipt) notFound();
 
