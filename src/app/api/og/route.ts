@@ -205,9 +205,9 @@ export async function GET(request: NextRequest) {
   const receipt = await getReceipt(slug);
 
   // Use placeholder values if receipt not found
-  const theme = receipt
-    ? getMoodTheme(receipt.moodPreset)
-    : getMoodTheme("reflective");
+  const theme = receipt && receipt.moodPreset
+  ? getMoodTheme(receipt.moodPreset)
+  : getMoodTheme("reflective");
 
   const subtitle = receipt
     ? buildSubtitle(receipt.timeInvested, receipt.moneySpent)
