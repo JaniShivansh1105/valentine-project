@@ -1,23 +1,9 @@
-import { notFound } from "next/navigation";
-import type { Metadata } from "next";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import { getReceipt } from "@/lib/store";
-import { getMoodTheme } from "@/lib/mood";
-import { buildSubtitle } from "@/lib/mood";
-import { receiptUrl } from "@/lib/utils";
-import { RECEIPT_VERDICT, SHARE_CAPTION, META } from "@/lib/copy";
-import { FEATURE_FLAGS } from "@/lib/feature-flags";
-import { ReceiptCard } from "./receipt-card";
-
-export const dynamic = "force-dynamic";
-
 interface Props {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = await params;
+  const { id } = params;
   const receipt = await getReceipt(id);
   if (!receipt) return { title: "Not Found" };
 
@@ -25,7 +11,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = `Closure Receipt — ${buildSubtitle(receipt.timeInvested, receipt.moneySpent)}`;
   const url = receiptUrl(receipt.slug, process.env.NEXT_PUBLIC_BASE_URL);
 
-  // OG image URL — uses /api/og endpoint if feature enabled
   const ogImageUrl = FEATURE_FLAGS.OG_API
     ? `${process.env.NEXT_PUBLIC_BASE_URL || ""}/api/og?slug=${receipt.slug}`
     : undefined;
@@ -59,7 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ReceiptPage({ params }: Props) {
-  const { id } = await params;
+  const { id } = params;
   const receipt = await getReceipt(id);
 
   if (!receipt) notFound();
