@@ -202,7 +202,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Fetch receipt data
-  const receipt = await getReceipt(slug);
+  const receipt = (await getReceipt(slug)) as any;
 
   // Use placeholder values if receipt not found
   const theme = receipt && receipt.moodPreset
