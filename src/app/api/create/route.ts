@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { saveReceipt } from "@/lib/store";
+import clientPromise from "@/lib/mongodb";
 import { isRateLimited } from "@/lib/rate-limit";
 import { receiptUrl } from "@/lib/utils";
 import { moderateContent } from "@/lib/moderation";
@@ -64,8 +64,16 @@ export async function POST(request: NextRequest) {
     tone: VALID_TONES.includes(body.tone) ? body.tone : "wry",
   };
 
-  const slug = await saveReceipt(data);
-  const url = receiptUrl(slug, process.env.NEXT_PUBLIC_BASE_URL);
+  const client = await clientPromise;
+const db = client.db("closureDB");
 
-  return NextResponse.json({ slug, url }, { status: 201 });
+const result = await db.collection("receipts").insertOne({
+  ...data,
+  createdAt: new Date(),
+});
+
+const slug = result.insertedId.toString();
+const url = receiptUrl(slug, process.env.NEXT_PUBLIC_BASE_URL);
+
+return NextResponse.json({ slug, url }, { status: 201 });
 }

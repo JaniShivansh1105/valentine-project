@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getReceipt } from "@/lib/store";
+import { ObjectId } from "mongodb";
+import clientPromise from "@/lib/mongodb";
 
 export async function GET(
   _request: NextRequest,
@@ -11,11 +12,26 @@ export async function GET(
     return NextResponse.json({ error: "Missing slug." }, { status: 400 });
   }
 
-  const receipt = await getReceipt(slug);
+  try {
+    const client = await clientPromise;
+    const db = client.db("closureDB");
 
-  if (!receipt) {
-    return NextResponse.json({ error: "Receipt not found." }, { status: 404 });
+    const receipt = await db
+      .collection("receipts")
+      .findOne({ _id: new ObjectId(slug) });
+
+    if (!receipt) {
+      return NextResponse.json(
+        { error: "Receipt not found." },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(receipt);
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Invalid receipt ID." },
+      { status: 400 }
+    );
   }
-
-  return NextResponse.json(receipt);
 }
