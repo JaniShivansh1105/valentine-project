@@ -16,7 +16,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { MascotSVG } from "@/components/mascot";
 import type { ReceiptRecord } from "@/lib/types";
-import { getMoodTheme, buildSubtitle, deriveLessons, closurePlaylist, toneLine } from "@/lib/mood";
+import { getMoodTheme, buildSubtitle, deriveLessons, toneLine } from "@/lib/mood";
+import { getPlaylistForReceipt } from "@/lib/playlist";
 import { receiptUrl, withUtm } from "@/lib/utils";
 import { RECEIPT_VERDICT, RECEIPT_TITLE } from "@/lib/copy";
 import { track, trackPageView } from "@/lib/analytics";
@@ -56,7 +57,7 @@ export function ReceiptCard({ receipt }: Props) {
   const theme = getMoodTheme(receipt.moodPreset);
   const subtitle = buildSubtitle(receipt.timeInvested, receipt.moneySpent);
   const lessons = deriveLessons(receipt.emotionalDamage, receipt.betrayalLevel);
-  const playlist = closurePlaylist(receipt.emotionalDamage);
+  const { spotifyUrl } = getPlaylistForReceipt(receipt);
   const url = receiptUrl(receipt.slug, typeof window !== "undefined" ? window.location.origin : undefined);
   const displayName = receipt.anonymous ? "Anonymous" : receipt.yourName || "Anonymous";
   const closing = toneLine(receipt.tone ?? "wry", receipt.emotionalDamage);
@@ -234,13 +235,13 @@ export function ReceiptCard({ receipt }: Props) {
 
           {/* Playlist suggestion */}
           <a
-            href={playlist.url}
+            href={spotifyUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 text-sm text-neutral-400 hover:text-neutral-600 transition-colors"
           >
             <Music className="h-3.5 w-3.5" />
-            Playlist: {playlist.label}
+            Closure Playlist
           </a>
         </CardContent>
       </Card>
