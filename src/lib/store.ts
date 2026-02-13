@@ -47,7 +47,7 @@ export async function getReceipt(id: string): Promise<ReceiptRecord | null> {
           ? receipt.createdAt.toISOString()
           : String(receipt.createdAt),
       moodPreset: moodFromDamage(emotionalDamage),
-    } as ReceiptRecord;
+    } as unknown as ReceiptRecord;
   } catch (error) {
     console.error("Error fetching receipt:", error);
     return null;
