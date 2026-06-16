@@ -2,163 +2,80 @@
 
 > Turn your breakup into a receipt. Share it, download it, and move on.
 
-**Branch:** `polish/closure-2026` — Viral-ready polish update
+Closure Receipt is a witty, modern web application built for reflection, not revenge. It allows users to generate a "receipt" quantifying their past relationships, complete with emotional damage calculations, tailored microcopy, and dynamic social sharing.
+
+---
+
+## 🎯 The Purpose
+
+Breakups are messy. **Closure Receipt** is designed to provide a playful, structured way to process the end of a relationship. Instead of sending an angry text, users can fill out a form to quantify the "investment" (time, money, and emotional damage) and receive a beautifully formatted, downloadable receipt. It turns the chaotic feelings of a breakup into a clean, tangible, and humorous artifact—helping people close the tab on the past and move forward.
+
+## 🛠️ How It Works
+
+1. **The Assessment:** The user fills out an interactive, multi-step form detailing their relationship (partner's name, time invested, money spent, betrayal level, and emotional damage).
+2. **The Calculation:** Based on the slider inputs (like "Emotional Damage" from 0-10), the application dynamically generates a custom "Mood Profile" (Calm, Reflective, Spicy, or Nuclear), complete with color palettes and mascot expressions.
+3. **The Receipt:** The app securely saves the data in MongoDB and generates a unique, shareable receipt URL.
+4. **The Closure:** The user can download the receipt as a PDF, share an Open Graph social card on Twitter/Instagram, or copy an embed badge for their personal site.
+
+---
+
+## ✨ Features
+
+- **Dynamic Receipt Generation:** Calculates "lessons learned" and tone-specific copy based on user input.
+- **Robust Architecture:** Built on Next.js App Router with strict TypeScript enforcement.
+- **MongoDB Integration:** Secure receipt storage and a robust, horizontally scalable MongoDB-backed rate limiter (Standard: 10/min, Strict: 1/min + 10/day).
+- **Vercel Analytics:** Native integration with `@vercel/analytics` for seamless, privacy-respecting event tracking.
+- **Dynamic SEO & Open Graph:** Automated `sitemap.ts` generation and an on-the-fly `/api/og` endpoint that generates 1200x630 SVG social cards featuring the brand mascot.
+- **Accessibility First:** Supports `prefers-reduced-motion`, `aria-live` value announcements, and comprehensive focus trapping.
+- **Brand Voice Consistency:** Highly curated copy (`lib/copy.ts`), including bespoke, witty 404 pages and subtle mascot interactions.
 
 ---
 
 ## 🚀 Quick Start
 
-```bash
-npm install
-npm run dev
-```
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-Open [http://localhost:3000](http://localhost:3000).
+2. **Configure your environment:**
+   Create a `.env.local` file in the root directory and add your MongoDB connection string:
+   ```bash
+   MONGODB_URI="mongodb+srv://<username>:<password>@cluster.mongodb.net/closureDB"
+   ```
 
----
+3. **Run the development server:**
+   ```bash
+   npm run dev
+   ```
 
-## 📋 What's New in polish/closure-2026
-
-This branch contains a comprehensive polish update with the following improvements:
-
-### ✨ High-Impact Fixes
-- **Hero redesign**: Three-line headline structure (6.5rem on desktop)
-- **Breakup word animation**: Subtle -2° rotation with underline
-- **CTA hover**: Scale 1.06 animation at 120ms
-- **Mascot interaction**: Blinks/glances on CTA hover
-
-### 🖼️ OG Image Endpoint
-- **`/api/og?slug={slug}`**: Dynamic SVG OG images (1200×630)
-- Includes verdict, subtitle, receipt number, and mascot
-- Proper caching headers
-
-### 📄 PDF Font Embedding
-- Poppins ExtraBold embedded in PDF exports
-- Print styles ensure proper font rendering
-- Helper utilities in `/lib/pdf-fonts.ts`
-
-### 📊 Analytics Instrumentation
-- Event tracking interface (swap GA4/Mixpanel easily)
-- Opt-out via `?analytics=0` or `localStorage.optOutAnalytics`
-- Events: `page_view_*`, `receipt_created`, `pdf_downloaded`, `share_clicked`
-
-### 🔒 Security & Ethics
-- Rate limiting (standard: 10/min, strict: 1/min + 10/day)
-- Content moderation on "last words" field
-- Report API at `/api/report`
-- Privacy tip shown in form
-
-### ♿ Accessibility
-- Slider value announcements via `aria-live`
-- Proper `aria-label` on all interactive elements
-- `prefers-reduced-motion` support
-- Focus trap improvements
-
-### 🎯 Copy Standardisation
-- All copy in `/lib/copy.ts`
-- Style guide in `/content/style-guide.md`
-- Single share caption: **"No refunds. Just receipts — close the tab and glow up."**
-
----
-
-## 🧪 Running Tests
-
-```bash
-npm test
-```
-
-### Test Coverage
-- `/lib/copy.ts` — Copy constants validation
-- `/lib/moderation.ts` — Content filtering
-- `/lib/analytics.ts` — Event tracking
-- `/lib/pdf-fonts.ts` — PDF font utilities
-- `/api/og` — OG endpoint SVG generation
-
----
-
-## 🚀 Launch Checklist
-
-Run the launch checklist to validate deployment readiness:
-
-```bash
-# Start the dev server first
-npm run dev
-
-# In another terminal
-node scripts/launch-checklist.js
-```
-
-The script validates:
-- OG endpoint returns valid SVG
-- Fonts directory exists
-- Environment variables configured
-- Report storage ready
-- API endpoints responding
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
 ## 🎛️ Feature Flags
 
-Enable features via environment variables in `.env.local`:
+Closure Receipt makes heavy use of feature flags to allow safe rollouts and toggling of experimental UI/UX features. These are managed in your `.env.local`:
 
 ```bash
-# Polished hero with 3-line structure
-NEXT_PUBLIC_FEATURE_POLISHED_HERO=true
+# UI Enhancements
+NEXT_PUBLIC_FEATURE_POLISHED_HERO="false"
+NEXT_PUBLIC_FEATURE_MASCOT_INTERACTION="false"
 
-# Dynamic OG images
-NEXT_PUBLIC_FEATURE_OG_API=true
+# Analytics & Moderation
+NEXT_PUBLIC_FEATURE_ANALYTICS="true"
+NEXT_PUBLIC_FEATURE_CONTENT_MODERATION="true"
 
-# Mascot interaction on CTA hover
-NEXT_PUBLIC_FEATURE_MASCOT_INTERACTION=true
+# Export & Sharing
+NEXT_PUBLIC_FEATURE_OG_API="true"
+NEXT_PUBLIC_FEATURE_PDF_FONTS="false"
+NEXT_PUBLIC_FEATURE_EMBED_BADGE="false"
 
-# Analytics tracking
-NEXT_PUBLIC_FEATURE_ANALYTICS=true
-
-# Content moderation on last words
-NEXT_PUBLIC_FEATURE_CONTENT_MODERATION=true
-
-# PDF font embedding
-NEXT_PUBLIC_FEATURE_PDF_FONTS=true
-
-# Strict rate limiting (1/min, 10/day)
-NEXT_PUBLIC_FEATURE_STRICT_RATE_LIMIT=true
-
-# Embeddable badge widget
-NEXT_PUBLIC_FEATURE_EMBED_BADGE=true
-
-# Hero A/B test variant
-NEXT_PUBLIC_FEATURE_HERO_VARIANT=A  # or B
+# Security & Limits
+NEXT_PUBLIC_FEATURE_STRICT_RATE_LIMIT="false"
 ```
 
----
-
-## 📝 Swapping Analytics Provider
-
-Edit `/lib/analytics.ts` and modify the `send()` function:
-
-```typescript
-// GA4
-function send(name: string, payload?: Record<string, unknown>): void {
-  if (typeof window !== "undefined" && (window as any).gtag) {
-    (window as any).gtag("event", name, payload ?? {});
-  }
-}
-
-// Mixpanel
-function send(name: string, payload?: Record<string, unknown>): void {
-  if (typeof window !== "undefined" && (window as any).mixpanel) {
-    (window as any).mixpanel.track(name, payload ?? {});
-  }
-}
-```
-
----
-
-## 🖼️ Adding Fonts for PDF
-
-1. Download Poppins-ExtraBold.woff2 from Google Fonts
-2. Place in `public/fonts/Poppins-ExtraBold.woff2`
-3. Enable feature flag: `NEXT_PUBLIC_FEATURE_PDF_FONTS=true`
+*Note: In a production environment, `NEXT_PUBLIC_FEATURE_ANALYTICS` and `NEXT_PUBLIC_FEATURE_OG_API` will automatically default to `true` if left undefined.*
 
 ---
 
@@ -168,72 +85,45 @@ function send(name: string, payload?: Record<string, unknown>): void {
 src/
 ├── app/
 │   ├── api/
-│   │   ├── create/     # Receipt creation
-│   │   ├── og/         # Dynamic OG images ✨
-│   │   └── report/     # Abuse reporting ✨
-│   ├── generate/       # Form page
-│   └── receipt/[id]/   # Receipt display
+│   │   ├── create/     # Secure receipt generation
+│   │   ├── og/         # Dynamic SVG Open Graph generator
+│   │   └── report/     # Unified moderation & reporting
+│   ├── generate/       # Interactive form interface
+│   └── receipt/[id]/   # Dynamic receipt view & 404
 ├── components/
-│   ├── mascot.tsx      # Animated mascot ✨
-│   ├── embed-badge.tsx # Embeddable widget ✨
-│   └── ui/             # Shadcn components
+│   ├── mascot.tsx      # SVG mascot with mood states
+│   ├── embed-badge.tsx # Embeddable badge widget
+│   └── ui/             # Reusable UI primitives
 ├── lib/
-│   ├── analytics.ts    # Event tracking ✨
-│   ├── copy.ts         # Standardised copy ✨
-│   ├── feature-flags.ts # Feature toggles ✨
-│   ├── moderation.ts   # Content filtering ✨
-│   ├── mood.ts         # Mood theming
-│   ├── pdf-fonts.ts    # PDF font embedding ✨
-│   ├── rate-limit.ts   # Rate limiting ✨
-│   └── utils.ts        # Utilities
-└── __tests__/          # Unit tests ✨
-
-scripts/
-└── launch-checklist.js # Pre-deploy validation ✨
-
-content/
-└── style-guide.md      # Copy & tone guide ✨
+│   ├── analytics.ts    # Vercel Analytics wrapper
+│   ├── mongodb.ts      # Singleton DB connection
+│   ├── rate-limit.ts   # MongoDB-backed rate limiter
+│   └── types.ts        # Strict TypeScript schemas
+└── __tests__/          # Jest test suites
 ```
 
 ---
 
-## 🔗 Key URLs
+## 🧪 Testing
 
-| Endpoint | Description |
-|----------|-------------|
-| `/` | Home page with hero |
-| `/generate` | Receipt creation form |
-| `/receipt/{slug}` | Receipt view |
-| `/api/og?slug={slug}` | Dynamic OG image |
-| `/api/create` | Create receipt API |
-| `/api/report` | Report abuse API |
+The project maintains rigorous test coverage ensuring copy validation, content moderation filters, rate limiting logic, and Open Graph generation remain pristine.
+
+```bash
+# Run the test suite
+npm test
+```
 
 ---
 
-## 📜 Single Share Caption
+## 🚀 Deployment
 
-Use this caption for all social sharing:
+Closure Receipt is perfectly optimised for [Vercel](https://vercel.com/). 
 
-> **"No refunds. Just receipts — close the tab and glow up."**
+Before deploying, ensure:
+1. Your MongoDB Atlas cluster is configured to allow connections from Vercel's IP range (or `0.0.0.0/0`).
+2. Your production `NEXT_PUBLIC_BASE_URL` is correctly set in your Vercel Environment Variables to ensure Open Graph images and share links resolve correctly.
 
----
-
-## 🛡️ Migration Notes
-
-When merging to `main`:
-
-1. Review feature flags and enable as needed
-2. Add Poppins font to `public/fonts/` for PDF embedding
-3. Set `NEXT_PUBLIC_BASE_URL` in production
-4. Run launch checklist before deploy
-5. Test OG images with social debuggers
-
----
-
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run build
+npm start
+```
