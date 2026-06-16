@@ -143,36 +143,15 @@ body {
   font-weight: 800;
 }
 
-/* Print / PDF helper */
+/* Print / PDF base rules — receipt-specific styles are in lib/pdf-fonts.ts */
 @media print {
   .no-print { display: none !important; }
-  body { 
-    background: #fff !important; 
-    -webkit-print-color-adjust: exact; 
-    print-color-adjust: exact;
-    font-size: 11px !important;
-    line-height: 1.2 !important;
-  }
   footer { display: none !important; }
-  
-  /* Ensure heading font in print with PoppinsExtraBold */
-  .receipt-heading,
-  [data-pdf-heading] {
-    font-family: 'PoppinsExtraBold', 'Poppins', system-ui, sans-serif !important;
-    font-weight: 800 !important;
+  body {
+    background: #fff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
-  
-  /* Apply PoppinsExtraBold to receipt card for consistent PDF rendering */
-  .receipt-card {
-    font-family: 'PoppinsExtraBold', 'Poppins', system-ui, sans-serif !important;
-  }
-
-  /* Remove any default margins that might cause page breaks */
-  * {
-    margin-top: 0 !important;
-  }
-  
-  /* Force single page layout */
   html, body {
     height: auto !important;
     overflow: visible !important;

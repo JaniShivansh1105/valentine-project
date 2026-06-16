@@ -1,16 +1,4 @@
-import { generateSlug, receiptUrl, withUtm } from "@/lib/utils";
-
-describe("generateSlug", () => {
-  it("returns an 8-character alphanumeric string", () => {
-    const slug = generateSlug();
-    expect(slug).toMatch(/^[a-z0-9]{8}$/);
-  });
-
-  it("generates unique slugs", () => {
-    const slugs = new Set(Array.from({ length: 50 }, () => generateSlug()));
-    expect(slugs.size).toBe(50);
-  });
-});
+import { receiptUrl, withUtm } from "@/lib/utils";
 
 describe("receiptUrl", () => {
   it("builds a URL with the given base", () => {

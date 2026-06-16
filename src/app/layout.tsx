@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 import { Toaster } from "sonner";
+import { Analytics } from "@vercel/analytics/react";
 import { ValentineBackground } from "@/components/valentine-bg";
 import "./globals.css";
 
@@ -62,6 +63,7 @@ export default function RootLayout({
           </footer>
         </div>
         <Toaster position="top-center" richColors closeButton />
+        <Analytics />
       </body>
     </html>
   );

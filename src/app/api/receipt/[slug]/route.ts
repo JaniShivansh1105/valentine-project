@@ -28,7 +28,7 @@ export async function GET(
     }
 
     return NextResponse.json(receipt);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Invalid receipt ID." },
       { status: 400 }

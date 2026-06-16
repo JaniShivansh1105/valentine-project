@@ -19,13 +19,6 @@ export const FEATURE_FLAGS = {
   POLISHED_HERO: process.env.NEXT_PUBLIC_FEATURE_POLISHED_HERO === "true",
 
   /**
-   * Enable A/B test variant for hero section.
-   * Set FEATURE_HERO_VARIANT=B in .env.local to show variant B.
-   * Values: "A" (default), "B" (experimental)
-   */
-  HERO_VARIANT: (process.env.NEXT_PUBLIC_FEATURE_HERO_VARIANT as "A" | "B") || "A",
-
-  /**
    * Enable mascot interaction on CTA hover.
    * Set FEATURE_MASCOT_INTERACTION=true in .env.local to enable.
    */
@@ -40,8 +33,10 @@ export const FEATURE_FLAGS = {
   /**
    * Enable enhanced analytics tracking.
    * Set FEATURE_ANALYTICS=true in .env.local to enable.
+   * Defaults to true in production when env var is not set.
    */
-  ANALYTICS: process.env.NEXT_PUBLIC_FEATURE_ANALYTICS === "true",
+  ANALYTICS: process.env.NEXT_PUBLIC_FEATURE_ANALYTICS === "true" || 
+             (process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_FEATURE_ANALYTICS === undefined),
 
   /**
    * Enable content moderation on last words field.
@@ -80,7 +75,7 @@ export const FEATURE_FLAGS = {
  * @returns boolean indicating if the feature is enabled
  */
 export function isFeatureEnabled(
-  flag: keyof Omit<typeof FEATURE_FLAGS, "HERO_VARIANT">
+  flag: keyof typeof FEATURE_FLAGS
 ): boolean {
   return FEATURE_FLAGS[flag] === true;
 }
@@ -90,6 +85,6 @@ export function isFeatureEnabled(
  */
 export function getEnabledFeatures(): string[] {
   return Object.entries(FEATURE_FLAGS)
-    .filter(([, value]) => value === true || (typeof value === "string" && value !== "A"))
+    .filter(([, value]) => value === true)
     .map(([key]) => key);
 }

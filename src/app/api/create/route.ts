@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import clientPromise from "@/lib/mongodb";
+import { saveReceipt } from "@/lib/store";
 import { isRateLimited } from "@/lib/rate-limit";
 import { receiptUrl } from "@/lib/utils";
 import { moderateContent } from "@/lib/moderation";
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     request.headers.get("x-real-ip") ||
     "unknown";
 
-  if (isRateLimited(ip)) {
+  if (await isRateLimited(ip)) {
     return NextResponse.json(
       { error: "Too many requests. Please wait a moment and try again." },
       { status: 429 }
@@ -64,16 +64,8 @@ export async function POST(request: NextRequest) {
     tone: VALID_TONES.includes(body.tone) ? body.tone : "wry",
   };
 
-  const client = await clientPromise;
-const db = client.db("closureDB");
+  const slug = await saveReceipt(data);
+  const url = receiptUrl(slug, process.env.NEXT_PUBLIC_BASE_URL);
 
-const result = await db.collection("receipts").insertOne({
-  ...data,
-  createdAt: new Date(),
-});
-
-const slug = result.insertedId.toString();
-const url = receiptUrl(slug, process.env.NEXT_PUBLIC_BASE_URL);
-
-return NextResponse.json({ slug, url }, { status: 201 });
+  return NextResponse.json({ slug, url }, { status: 201 });
 }

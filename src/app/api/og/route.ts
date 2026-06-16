@@ -14,18 +14,8 @@ import { getReceipt } from "@/lib/store";
 import { getMoodTheme, buildSubtitle } from "@/lib/mood";
 import { RECEIPT_VERDICT, SHARE_CAPTION } from "@/lib/copy";
 import { FEATURE_FLAGS } from "@/lib/feature-flags";
+import { receiptNumber } from "@/lib/utils";
 
-/**
- * Generate a receipt number from slug and date.
- */
-function receiptNumber(slug: string, createdAt: string): string {
-  const date = new Date(createdAt);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  const hash = slug.slice(0, 4).toUpperCase();
-  return `CR-${year}-${month}-${day}-${hash}`;
-}
 
 /**
  * Generate the inline SVG mascot for the OG image.
@@ -202,7 +192,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Fetch receipt data
-  const receipt = (await getReceipt(slug)) as any;
+  const receipt = (await getReceipt(slug)) as import("@/lib/types").ReceiptRecord | null;
 
   // Use placeholder values if receipt not found
   const theme = receipt && receipt.moodPreset

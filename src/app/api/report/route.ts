@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
+import { isRateLimited } from "@/lib/rate-limit";
 
 interface Report {
   slug: string;
@@ -8,28 +9,13 @@ interface Report {
   ip: string;
 }
 
-const reportHits = new Map<string, number>();
-const REPORT_COOLDOWN_MS = 60_000;
-
-function isReportRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const last = reportHits.get(ip);
-
-  if (last && now - last < REPORT_COOLDOWN_MS) {
-    return true;
-  }
-
-  reportHits.set(ip, now);
-  return false;
-}
-
 export async function POST(request: NextRequest) {
   const ip =
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     request.headers.get("x-real-ip") ||
     "unknown";
 
-  if (isReportRateLimited(ip)) {
+  if (await isRateLimited(ip)) {
     return NextResponse.json(
       { error: "Please wait before submitting another report." },
       { status: 429 }

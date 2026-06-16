@@ -69,20 +69,11 @@ function isOptedOut(): boolean {
 // Swap this function body to integrate your analytics provider.
 // ─────────────────────────────────────────────────────────────
 
+import { track as vercelTrack } from "@vercel/analytics/react";
+
 /**
  * Send event to analytics provider.
- *
- * Example GA4 integration:
- * ```ts
- * if (typeof gtag !== 'undefined') {
- *   gtag('event', name, payload ?? {});
- * }
- * ```
- *
- * Example Mixpanel:
- * ```ts
- * mixpanel.track(name, payload ?? {});
- * ```
+ * Uses @vercel/analytics/react
  */
 function send(name: string, payload?: Record<string, unknown>): void {
   // Log to console in development and test environments
@@ -90,15 +81,23 @@ function send(name: string, payload?: Record<string, unknown>): void {
     console.log("[Analytics]", name, payload ?? {});
   }
 
-  // GA4 / gtag (uncomment when ready)
-  // if (typeof window !== "undefined" && (window as any).gtag) {
-  //   (window as any).gtag("event", name, payload ?? {});
-  // }
+  // Convert payload values to strings/numbers/booleans for Vercel Analytics compatibility
+  const safePayload: Record<string, string | number | boolean> = {};
+  if (payload) {
+    for (const [key, value] of Object.entries(payload)) {
+      if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+        safePayload[key] = value;
+      } else if (value !== null && value !== undefined) {
+        safePayload[key] = JSON.stringify(value);
+      }
+    }
+  }
 
-  // Mixpanel (uncomment when ready)
-  // if (typeof window !== "undefined" && (window as any).mixpanel) {
-  //   (window as any).mixpanel.track(name, payload ?? {});
-  // }
+  try {
+    vercelTrack(name, Object.keys(safePayload).length > 0 ? safePayload : undefined);
+  } catch (err) {
+    console.error("[Analytics Error]", err);
+  }
 }
 
 // ─────────────────────────────────────────────────────────────

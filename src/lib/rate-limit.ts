@@ -1,5 +1,5 @@
 /**
- * Rate Limiter with Feature Flag Support
+ * Rate Limiter with Feature Flag Support (MongoDB Backed)
  *
  * Provides two modes:
  * - Standard: 10 requests per minute per IP
@@ -11,6 +11,7 @@
  */
 
 import { FEATURE_FLAGS } from "./feature-flags";
+import clientPromise from "./mongodb";
 
 // ─────────────────────────────────────────────────────────────
 // CONFIGURATION
@@ -25,85 +26,98 @@ const STRICT_DAILY_MAX = 10;            // 10 per day
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 // ─────────────────────────────────────────────────────────────
-// STORAGE
+// STORAGE INTERFACES
 // ─────────────────────────────────────────────────────────────
 
 interface RateLimitEntry {
+  _id: string;
   count: number;
   resetAt: number;
 }
 
 interface StrictRateLimitEntry {
+  _id: string;
   minuteCount: number;
   minuteResetAt: number;
   dailyCount: number;
   dailyResetAt: number;
 }
 
-const standardHits = new Map<string, RateLimitEntry>();
-const strictHits = new Map<string, StrictRateLimitEntry>();
-
 // ─────────────────────────────────────────────────────────────
 // STANDARD RATE LIMITER
 // ─────────────────────────────────────────────────────────────
 
-function isStandardRateLimited(ip: string): boolean {
+async function isStandardRateLimited(ip: string): Promise<boolean> {
   const now = Date.now();
-  const entry = standardHits.get(ip);
+  const client = await clientPromise;
+  const db = client.db("closureDB");
+  const collection = db.collection<RateLimitEntry>("rateLimits");
 
-  if (!entry || now > entry.resetAt) {
-    standardHits.set(ip, { count: 1, resetAt: now + STANDARD_WINDOW_MS });
+  const doc = await collection.findOne({ _id: `std_${ip}` });
+
+  if (!doc || now > doc.resetAt) {
+    await collection.updateOne(
+      { _id: `std_${ip}` },
+      { $set: { count: 1, resetAt: now + STANDARD_WINDOW_MS } },
+      { upsert: true }
+    );
     return false;
   }
 
-  entry.count += 1;
-  return entry.count > STANDARD_MAX_REQUESTS;
+  await collection.updateOne(
+    { _id: `std_${ip}` },
+    { $inc: { count: 1 } }
+  );
+
+  return doc.count >= STANDARD_MAX_REQUESTS;
 }
 
 // ─────────────────────────────────────────────────────────────
 // STRICT RATE LIMITER (1/min, 10/day)
 // ─────────────────────────────────────────────────────────────
 
-function isStrictRateLimited(ip: string): boolean {
+async function isStrictRateLimited(ip: string): Promise<boolean> {
   const now = Date.now();
-  let entry = strictHits.get(ip);
+  const client = await clientPromise;
+  const db = client.db("closureDB");
+  const collection = db.collection<StrictRateLimitEntry>("strictRateLimits");
 
-  // Initialise or reset entry
-  if (!entry) {
-    entry = {
+  let doc = await collection.findOne({ _id: `strict_${ip}` });
+
+  if (!doc) {
+    const newDoc: StrictRateLimitEntry = {
+      _id: `strict_${ip}`,
       minuteCount: 0,
       minuteResetAt: now + STRICT_WINDOW_MS,
       dailyCount: 0,
       dailyResetAt: now + DAY_MS,
     };
-    strictHits.set(ip, entry);
+    await collection.insertOne(newDoc);
+    doc = newDoc;
   }
 
-  // Reset minute window if expired
-  if (now > entry.minuteResetAt) {
-    entry.minuteCount = 0;
-    entry.minuteResetAt = now + STRICT_WINDOW_MS;
+  const updates: Partial<StrictRateLimitEntry> = {};
+  
+  if (now > doc.minuteResetAt) {
+    doc.minuteCount = 0;
+    updates.minuteResetAt = now + STRICT_WINDOW_MS;
+  }
+  
+  if (now > doc.dailyResetAt) {
+    doc.dailyCount = 0;
+    updates.dailyResetAt = now + DAY_MS;
   }
 
-  // Reset daily window if expired
-  if (now > entry.dailyResetAt) {
-    entry.dailyCount = 0;
-    entry.dailyResetAt = now + DAY_MS;
-  }
+  if (doc.dailyCount >= STRICT_DAILY_MAX) return true;
+  if (doc.minuteCount >= STRICT_MAX_PER_MINUTE) return true;
 
-  // Check daily limit first
-  if (entry.dailyCount >= STRICT_DAILY_MAX) {
-    return true;
-  }
+  updates.minuteCount = doc.minuteCount + 1;
+  updates.dailyCount = doc.dailyCount + 1;
 
-  // Check minute limit
-  if (entry.minuteCount >= STRICT_MAX_PER_MINUTE) {
-    return true;
-  }
-
-  // Increment counters
-  entry.minuteCount += 1;
-  entry.dailyCount += 1;
+  await collection.updateOne(
+    { _id: `strict_${ip}` },
+    { $set: updates }
+  );
 
   return false;
 }
@@ -119,7 +133,7 @@ function isStrictRateLimited(ip: string): boolean {
  * @param ip - The IP address to check
  * @returns true if rate limited, false otherwise
  */
-export function isRateLimited(ip: string): boolean {
+export async function isRateLimited(ip: string): Promise<boolean> {
   if (FEATURE_FLAGS.STRICT_RATE_LIMIT) {
     return isStrictRateLimited(ip);
   }

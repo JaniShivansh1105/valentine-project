@@ -1,5 +1,6 @@
 "use client";
 
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { withUtm } from "@/lib/utils";
 import { SHARE_CAPTION } from "@/lib/copy";
@@ -14,12 +15,14 @@ interface Props {
 }
 
 /**
- * Social share buttons — WhatsApp, X, Instagram, LinkedIn, Facebook, Reddit.
+ * Social share buttons — WhatsApp, X, Instagram (copy), LinkedIn, Facebook, Reddit.
  * Each link appends UTM params for tracking.
  * Uses the single approved share caption by default.
+ *
+ * Note: Instagram does not support URL-based web sharing.
+ * The Instagram button copies the link to clipboard with a guide toast.
  */
 export function ShareButtons({ url, text, slug }: Props) {
-  // Use the single perfect caption as default
   const shareText = text || SHARE_CAPTION;
   const encoded = (source: string) => encodeURIComponent(withUtm(url, source));
   const encodedText = encodeURIComponent(shareText);
@@ -30,7 +33,19 @@ export function ShareButtons({ url, text, slug }: Props) {
     }
   };
 
-  const channels = [
+  /** Instagram: copy link to clipboard — Instagram has no web share API */
+  const handleInstagramCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(withUtm(url, "instagram"));
+      toast.success("Link copied — paste it in your Instagram bio or story!");
+      handleClick("instagram");
+    } catch {
+      toast.error("Could not copy link.");
+    }
+  };
+
+  /** All standard link-based channels */
+  const linkChannels = [
     {
       label: "WhatsApp",
       href: `https://wa.me/?text=${encodedText}%20${encoded("whatsapp")}`,
@@ -42,12 +57,6 @@ export function ShareButtons({ url, text, slug }: Props) {
       href: `https://twitter.com/intent/tweet?text=${encodedText}&url=${encoded("twitter")}`,
       colour: "hover:bg-neutral-100 hover:text-neutral-900",
       channel: "x",
-    },
-    {
-      label: "Instagram",
-      href: `https://www.instagram.com/?url=${encoded("instagram")}`,
-      colour: "hover:bg-pink-50 hover:text-pink-600",
-      channel: "instagram",
     },
     {
       label: "LinkedIn",
@@ -71,7 +80,7 @@ export function ShareButtons({ url, text, slug }: Props) {
 
   return (
     <>
-      {channels.map((ch) => (
+      {linkChannels.map((ch) => (
         <Button
           key={ch.label}
           variant="outline"
@@ -85,6 +94,17 @@ export function ShareButtons({ url, text, slug }: Props) {
           </a>
         </Button>
       ))}
+
+      {/* Instagram — copy to clipboard (no web share API support) */}
+      <Button
+        variant="outline"
+        size="sm"
+        className="transition-colors hover:bg-pink-50 hover:text-pink-600"
+        onClick={handleInstagramCopy}
+        aria-label="Copy link for Instagram"
+      >
+        Instagram
+      </Button>
     </>
   );
 }

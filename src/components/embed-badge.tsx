@@ -9,7 +9,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Copy, Check } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -46,16 +46,23 @@ export function EmbedBadge({
   verdict,
   receiptNo,
   accent,
-  baseUrl = typeof window !== "undefined" ? window.location.origin : "",
+  baseUrl: propBaseUrl,
 }: EmbedBadgeProps) {
   const [copied, setCopied] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
 
   // Feature flag check
   if (!FEATURE_FLAGS.EMBED_BADGE) {
     return null;
   }
 
-  const snippet = generateEmbedSnippet(slug, baseUrl);
+  const resolvedBaseUrl = propBaseUrl || process.env.NEXT_PUBLIC_BASE_URL || (mounted ? window.location.origin : "");
+  const snippet = generateEmbedSnippet(slug, resolvedBaseUrl);
 
   const handleCopy = async () => {
     try {

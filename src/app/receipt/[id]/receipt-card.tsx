@@ -17,23 +17,18 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { MascotSVG } from "@/components/mascot";
 import type { ReceiptRecord } from "@/lib/types";
 import { getMoodTheme, buildSubtitle, deriveLessons, closurePlaylist, toneLine } from "@/lib/mood";
-import { receiptUrl, withUtm } from "@/lib/utils";
+import { receiptUrl, withUtm, receiptNumber } from "@/lib/utils";
 import { RECEIPT_VERDICT, RECEIPT_TITLE } from "@/lib/copy";
 import { track, trackPageView } from "@/lib/analytics";
 import { FEATURE_FLAGS } from "@/lib/feature-flags";
 import { withPdfFonts } from "@/lib/pdf-fonts";
 import { ShareButtons } from "./share-buttons";
+import { EmbedBadge } from "@/components/embed-badge";
 
 interface Props {
   receipt: ReceiptRecord;
 }
 
-/** Generate a receipt number from the slug + timestamp. */
-function receiptNumber(slug: string, createdAt: string): string {
-  const year = new Date(createdAt).getFullYear();
-  const hash = slug.slice(0, 4).toUpperCase();
-  return `CR-${year}-${hash}`;
-}
 
 /** Format timestamp for display. */
 function formatTimestamp(createdAt: string): { iso: string; formatted: string; timezone: string } {
@@ -264,6 +259,16 @@ export function ReceiptCard({ receipt }: Props) {
           <Flag className="mr-1 h-4 w-4" /> Report
         </Button>
       </div>
+
+      {/* Embed badge widget — shown when EMBED_BADGE flag is on */}
+      {FEATURE_FLAGS.EMBED_BADGE && (
+        <EmbedBadge
+          slug={receipt.slug}
+          verdict={RECEIPT_VERDICT}
+          receiptNo={rcptNo}
+          accent={theme.accent}
+        />
+      )}
     </motion.div>
   );
 }

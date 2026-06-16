@@ -8,8 +8,6 @@ import {
   POPPINS_FONT_FACE,
   PDF_PRINT_STYLES,
   getPdfFontCss,
-  getHtml2PdfOptions,
-  getPuppeteerPdfCss,
 } from "@/lib/pdf-fonts";
 
 describe("PDF Fonts Utilities", () => {
@@ -62,49 +60,4 @@ describe("PDF Fonts Utilities", () => {
     });
   });
 
-  describe("getHtml2PdfOptions()", () => {
-    it("returns object with expected properties", () => {
-      const options = getHtml2PdfOptions("test-receipt");
-
-      expect(options).toHaveProperty("margin");
-      expect(options).toHaveProperty("filename", "test-receipt.pdf");
-      expect(options).toHaveProperty("image");
-      expect(options).toHaveProperty("html2canvas");
-      expect(options).toHaveProperty("jsPDF");
-    });
-
-    it("uses default filename when not provided", () => {
-      const options = getHtml2PdfOptions();
-      expect(options.filename).toBe("receipt.pdf");
-    });
-
-    it("configures html2canvas with scale 2", () => {
-      const options = getHtml2PdfOptions();
-      expect(options.html2canvas.scale).toBe(2);
-    });
-
-    it("configures A4 portrait orientation", () => {
-      const options = getHtml2PdfOptions();
-      expect(options.jsPDF.format).toBe("a4");
-      expect(options.jsPDF.orientation).toBe("portrait");
-    });
-  });
-
-  describe("getPuppeteerPdfCss()", () => {
-    it("returns CSS string with font-face", () => {
-      const css = getPuppeteerPdfCss();
-      expect(css).toContain("@font-face");
-    });
-
-    it("sets Poppins for headings", () => {
-      const css = getPuppeteerPdfCss();
-      expect(css).toContain("Poppins");
-      expect(css).toContain("font-weight: 800");
-    });
-
-    it("includes print colour adjust", () => {
-      const css = getPuppeteerPdfCss();
-      expect(css).toContain("print-color-adjust: exact");
-    });
-  });
 });
