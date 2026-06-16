@@ -1,14 +1,19 @@
 import { MongoClient } from "mongodb";
 
-const uri = process.env.MONGODB_URI as string;
-
-if (!uri) {
-  throw new Error("Please add MONGODB_URI to .env.local");
-}
+const uri = process.env.MONGODB_URI;
 
 const options = {};
 
-const client = new MongoClient(uri, options);
-const clientPromise = client.connect();
+let clientPromise: Promise<MongoClient>;
+
+if (uri) {
+  const client = new MongoClient(uri, options);
+  clientPromise = client.connect();
+} else {
+  // Dummy promise so build doesn't crash if env is missing
+  clientPromise = Promise.reject(
+    new Error("MONGODB_URI is missing")
+  );
+}
 
 export default clientPromise;
